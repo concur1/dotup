@@ -16,7 +16,35 @@ struct T {
 // * 'repo_path' The path of the repo to sync with.
 pub fn sync(repo_path: &Path) -> Result<(), serde_json::Error> {
     println!("repo path: {repo_path:?}");
-    watch(repo_path).expect("Failed to watch:");
+    let data = r#"
+    [
+        {
+            "system_file_path": "/home/o/projects/file-backup/test.txt"
+        },
+        {
+            "system_file_path": "/home/o/projects/file-backup/test2.txt"
+        }
+    ]"#;
+    let files_to_track: Vec<T> = serde_json::from_str(data).expect("Error:");
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    // Automatically select the best implementation for your platform.
+    // You can also access each implementation directly e.g. INotifyWatcher.
+    let mut watcher = RecommendedWatcher::new(tx, Config::default()).expect("Error:");
+
+    // Add a path to be watched. All files and directories at that path and
+    // below will be monitored for changes.
+    for data in files_to_track{
+        watcher.watch(Path::new(&data.system_file_path),RecursiveMode::Recursive).expect("Error:");
+    }
+    watcher.watch(repo_path, RecursiveMode::Recursive).expect("Error:");
+    for res in rx {
+        match res {
+            Ok(event) => event_handler(event, repo_path),
+            Err(error) => log::error!("Error: {error:?}"),
+        }
+    }
+
     Ok(())
 }
 
@@ -124,41 +152,4 @@ fn sync_files(system_path: &Path, repo_path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-// Create and run the watchers that trigger events on file edit.
-//
-// # Arguments
-//
-// * `repo_path` - The path to the git repository for the file backups.
-fn watch(repo_path: &Path) -> notify::Result<()> {
 
-    let data = r#"
-    [
-        {
-            "system_file_path": "/home/o/projects/file-backup/test.txt"
-        },
-        {
-            "system_file_path": "/home/o/projects/file-backup/test2.txt"
-        }
-    ]"#;
-    let files_to_track: Vec<T> = serde_json::from_str(data).expect("Error:");
-
-    let (tx, rx) = std::sync::mpsc::channel();
-    // Automatically select the best implementation for your platform.
-    // You can also access each implementation directly e.g. INotifyWatcher.
-    let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
-
-    // Add a path to be watched. All files and directories at that path and
-    // below will be monitored for changes.
-    for data in files_to_track{
-        watcher.watch(Path::new(&data.system_file_path),RecursiveMode::Recursive)?;
-    }
-    watcher.watch(repo_path, RecursiveMode::Recursive).expect("Error:");
-    for res in rx {
-        match res {
-            Ok(event) => event_handler(event, repo_path),
-            Err(error) => log::error!("Error: {error:?}"),
-        }
-    }
-
-    Ok(())
-}
