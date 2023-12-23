@@ -1,31 +1,26 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::fs;
+use std::time::UNIX_EPOCH;
 use serde::{Serialize, Deserialize};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
+use crate::filedata::filedata;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
     system_file_path: String,
 }
 
-// Syncs the files specified in the ocnfiguration with the supplied repository path.
+// Syncs the files specified in the configureation with the supplied repository path.
 //
 // # Arguments
 //
 // * 'repo_path' The path of the repo to sync with.
 pub fn sync(repo_path: &Path) -> Result<(), serde_json::Error> {
+    let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
+
     println!("repo path: {repo_path:?}");
-    let data = r#"
-    [
-        {
-            "system_file_path": "/home/o/projects/file-backup/test.txt"
-        },
-        {
-            "system_file_path": "/home/o/projects/file-backup/test2.txt"
-        }
-    ]"#;
-    let files_to_track: Vec<T> = serde_json::from_str(data).expect("Error:");
+    let data = filedata::get_file_data(); 
+    let files_to_track = data.paths;
 
     let (tx, rx) = std::sync::mpsc::channel();
     // Automatically select the best implementation for your platform.
@@ -34,13 +29,13 @@ pub fn sync(repo_path: &Path) -> Result<(), serde_json::Error> {
 
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
-    for data in files_to_track{
-        watcher.watch(Path::new(&data.system_file_path),RecursiveMode::Recursive).expect("Error:");
+    for (key_path, value_path) in files_to_track.into_iter() {
+        watcher.watch(Path::new(&key_path),RecursiveMode::Recursive).expect("Error:");
+        watcher.watch(Path::new(&dest_path(&key_path, &abs_repo_path)),RecursiveMode::Recursive).expect("Error:");
     }
-    watcher.watch(repo_path, RecursiveMode::Recursive).expect("Error:");
     for res in rx {
         match res {
-            Ok(event) => event_handler(event, repo_path),
+            Ok(event) => event_handler(event, abs_repo_path.as_ref()),
             Err(error) => log::error!("Error: {error:?}"),
         }
     }
@@ -121,7 +116,7 @@ fn copy_file_if_unequal(source_file_path: &Path, dest_file_path: &Path) -> std::
 //
 // * `system_path` - The filepath in the system to sync.
 // * `repo_path` - The filepath in the repo to sync.
-fn sync_files(system_path: &Path, repo_path: &Path) -> std::io::Result<()> {
+pub fn sync_files(system_path: &Path, repo_path: &Path) -> std::io::Result<()> {
     if !!!system_path.exists() {
         println!("file does not exist in repo, creating file...");
         copy_file(repo_path, system_path).expect("Error:");
