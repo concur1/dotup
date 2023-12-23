@@ -2,14 +2,8 @@ mod sync;
 mod filedata;
 use clap::Parser;
 use serde::{Serialize, Deserialize};
-use std::fs::File;
-use std::io::Write;
-use std::io::Read;
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::path::Path;
 use std::fs;
-use std::fs::OpenOptions;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -61,7 +55,6 @@ fn main() {
         "untrack" => untrack(args),
         "run" => sync::sync::sync(&repo_path).expect("Syncing failed."),
         _ => println!("other action:")
-
     }
 }
 
