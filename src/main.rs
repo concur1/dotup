@@ -4,6 +4,8 @@ use clap::Parser;
 use serde::{Serialize, Deserialize};
 use std::path::PathBuf;
 use std::fs;
+use std::process::{Command, Stdio};
+use std::thread;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -46,6 +48,14 @@ fn untrack(args: Cli) {
     println!("File untracked.");
     }
 
+fn run(command: String) {
+
+Command::new("ls")
+        .stdin(Stdio::null())
+    .spawn()
+    .expect("ls command failed to start");
+}
+
 fn main() {
     let repo_path = PathBuf::from("../dotup_test_repo");
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
@@ -53,7 +63,7 @@ fn main() {
     match args.action.as_ref() {
         "track" => track(args),
         "untrack" => untrack(args),
-        "run" => sync::sync::sync(&repo_path).expect("Syncing failed."),
+        "run" => run("test".to_string()),//sync::sync::sync(&repo_path).expect("Syncing failed."),
         _ => println!("other action:")
     }
 }
