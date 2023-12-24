@@ -3,12 +3,14 @@ A command line tool for backing up dotfiles.
 
 
 TODO:
+- add consts for repo path and data.json 
 - Get tracking working on local system.
     - [x] Use repo path in notify watcher
     - [x] Get untrack working.
-    - [ ] Run gitui/lazygit/other from updot
     - [x] Get syncing working on local system.
-- Get syncing to pick up newly added files
+    - [x] Get syncing to pick up newly added files
+- [ ] create config
+- [ ] Run gitui/lazygit/other from updot
 - Get notify/sync command working.
 - Get working for multiple systems (generalize home/local/config)
 - Test running with gitui

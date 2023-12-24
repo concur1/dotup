@@ -21,7 +21,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
 
     // println!("repo path: {repo_path:?}");
-    let data = filedata::get_file_data(); 
+    let data = filedata::get_file_track_data(); 
     let files_to_track = data.paths;
 
     let (tx, rx) = std::sync::mpsc::channel();

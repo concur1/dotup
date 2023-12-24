@@ -1,13 +1,9 @@
-use clap::Parser;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::Write;
 use std::io::Read;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::path::Path;
-use std::fs;
-use std::fs::OpenOptions;
 
 
 #[derive(Serialize, Deserialize)]
@@ -16,7 +12,7 @@ pub struct FileData {
     pub paths: HashMap<PathBuf, PathBuf>
 }
 
-pub fn get_file_data () -> FileData {
+pub fn get_file_track_data () -> FileData {
     let tracking_data_path = PathBuf::from(r"data.json");
     let mut read_data = String::new();
     let default = FileData { paths : HashMap::new() };
@@ -32,7 +28,7 @@ pub fn get_file_data () -> FileData {
     read_file_data
 }
 
-pub fn write_file_data (file_data: FileData) {
+pub fn write_file_track_data (file_data: FileData) {
     let tracking_data_path = PathBuf::from(r"data.json");
     let json_output_data = serde_json::to_string(&file_data).expect("Could not convert to json."); 
     let mut f = File::create(tracking_data_path).expect("Unable to create file");
