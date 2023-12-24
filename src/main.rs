@@ -59,31 +59,28 @@ fn launch_ui(repo_path: PathBuf) {
     println!("{default_ui:?}");
     println!("{uiconfig:?}");
     let repo_path_arg_name = uiconfig.get("repo_path_arg_name").expect("fail get repo path arg name:");
-    let additional_args  = uiconfig.get("additional_args").expect("Additional_args has not been supplied in the config. Set to an empty string if there are no args to be supplied.").split(" ").collect::<Vec<&str>>();
-
+    let additional_args = uiconfig.get("additional_args")
+        .expect("Additional_args have not been supplied in the config. Set to an empty string if there are no args to be supplied.")
+        .split(" ")
+        .map(|s| s.to_owned())
+        .collect::<Vec<_>>();
+    let mut additional_args: Vec<&String> = additional_args.iter().collect();
+    
     let arg_string = format!("{}", repo_path.display());
-    if (additional_args.len() > 0) & (additional_args[0] != "") {
+    let mut arg_vec = vec![repo_path_arg_name, &arg_string];
+    let arg_vec = arg_vec.append(&mut additional_args);
     println!("additional_args - {additional_args:?}");
     let _ = Command::new(default_ui)
             .arg(repo_path_arg_name)
-            .arg(arg_string)
+            .arg(arg_string.clone())
             .args(additional_args)
             .status()
             .expect("Failed to execute command");
-    } else {
-    let _ = Command::new(default_ui)
-            .arg(repo_path_arg_name)
-            .arg(arg_string)
-            .status()
-            .expect("Failed to execute command");
-    }
 }
 
 fn run(repo_path: PathBuf) {
-
     let tracking_data_path = fs::canonicalize(PathBuf::from(r"data.json")).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
-
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
         //println!("test {repo_path:?}")
@@ -91,6 +88,15 @@ fn run(repo_path: PathBuf) {
         });
     launch_ui(repo_path);
 }
+
+//fn git(repo_path: PathBuf, git_args: Vec<String>) {
+//    let arg_string = format!("{}", repo_path.display());
+//    let _ = Command::new("git")
+//            .arg("-C")
+//            .arg(arg_string)
+//            .status()
+//            .expect("Failed to execute command");
+//}
 
 fn main() {
     let repo_path = PathBuf::from("../dotup_test_repo");

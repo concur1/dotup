@@ -7,3 +7,4 @@ additional_args = "--watcher" # Any additional args are supplied here
 [ui_config.lazygit]
 repo_path_arg_name = "-path" 
 additional_args = "" 
+
