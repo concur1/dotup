@@ -1,10 +1,14 @@
 default_ui = "gitui" # The git ui will be used when runnin 'updot run'
 
 [ui_config.gitui]
-repo_path_arg_name = "--directory" # The flag that is used to supply the directory of the git repo
-additional_args = "--watcher" # Any additional args are supplied here
+repo_path_arg_name = "--directory" # Only the flag that is used to supply the directory of the git repo
+additional_args = "--watcher --logging" # Any additional args are supplied here
 
 [ui_config.lazygit]
 repo_path_arg_name = "-path" 
+additional_args = "" 
+
+[ui_config.gitkraken]
+repo_path_arg_name = "--path" 
 additional_args = "" 
 

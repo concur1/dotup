@@ -29,7 +29,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     // You can also access each implementation directly e.g. INotifyWatcher.
     let mut watcher = RecommendedWatcher::new(tx, Config::default()).expect("Error:");
 
-    for (key_path, value_path) in files_to_track.clone().into_iter() {
+    for (key_path, _) in files_to_track.clone().into_iter() {
         let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
         sync_files(&key_path, &dest_path_final).expect("Error with initial file syncing");
     }
@@ -37,7 +37,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
     watcher.watch(tracking_data_path, RecursiveMode::Recursive).expect("Error:");
-    for (key_path, value_path) in files_to_track.into_iter() {
+    for (key_path, _) in files_to_track.into_iter() {
         watcher.watch(Path::new(&key_path),RecursiveMode::Recursive).expect("Error:");
         let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
         // println!("(key_path {key_path:?})");
@@ -49,7 +49,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
             Ok(event) => if event.paths.contains(&tracking_data_path.to_owned()) {
               break;
             } else {
-              let updated_paths = event.paths.clone();
+              //let updated_paths = event.paths.clone();
               event_handler(event, abs_repo_path.as_ref());
             },
             Err(error) => log::error!("Error: {error:?}"),
@@ -59,7 +59,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
         //    Err(error) => log::error!("Error: {error:?}"),
         //}
     }
-    sync(repo_path, tracking_data_path);
+    let _ = sync(repo_path, tracking_data_path);
 
     Ok(())
 }
@@ -123,7 +123,7 @@ fn copy_file(source_file_path: &Path, dest_file_path: &Path) -> std::io::Result<
 fn copy_file_if_unequal(source_file_path: &Path, dest_file_path: &Path) -> std::io::Result<()> {
     let source_hash = blake3::hash(fs::read_to_string(source_file_path).expect("Could not read file:{source_file_path:?}").as_bytes());
     let dest_hash = blake3::hash(fs::read_to_string(dest_file_path).expect("Could not read file:{source_file_path:?}").as_bytes());
-    let hashes_match = source_hash == dest_hash;
+    //let hashes_match = source_hash == dest_hash;
     // println!("hashes match: {hashes_match:?}");
     if source_hash != dest_hash {
         copy_file(source_file_path, dest_file_path).expect("Error:");

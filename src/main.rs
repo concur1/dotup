@@ -64,15 +64,21 @@ fn launch_ui(repo_path: PathBuf) {
         .split(" ")
         .map(|s| s.to_owned())
         .collect::<Vec<_>>();
-    let mut additional_args: Vec<&String> = additional_args.iter().collect();
+    let additional_args: Vec<&String> = additional_args.iter().collect();
     
     let arg_string = format!("{}", repo_path.display());
-    let mut arg_vec = vec![repo_path_arg_name, &arg_string];
-    arg_vec.append(&mut additional_args);
-    println!("additional_args - {additional_args:?}");
-    println!("arg_vec - {arg_vec:?}");
+    let mut args = additional_args;
+    if args[0] == "" {
+        args.remove(0);
+    }
+    args.push(repo_path_arg_name);
+    args.push(&arg_string);
+
+    //arg_vec.append(&mut additional_args);
+    println!("args - {args:?}");
+    //println!("arg_vec - {arg_vec:?}");
     let _ = Command::new(default_ui)
-            .args(arg_vec)
+            .args(args)
             .status()
             .expect("Failed to execute command");
 }
@@ -82,7 +88,6 @@ fn run(repo_path: PathBuf) {
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
-        //println!("test {repo_path:?}")
         sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
         });
     launch_ui(repo_path);
