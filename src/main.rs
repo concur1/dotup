@@ -68,12 +68,11 @@ fn launch_ui(repo_path: PathBuf) {
     
     let arg_string = format!("{}", repo_path.display());
     let mut arg_vec = vec![repo_path_arg_name, &arg_string];
-    let arg_vec = arg_vec.append(&mut additional_args);
+    arg_vec.append(&mut additional_args);
     println!("additional_args - {additional_args:?}");
+    println!("arg_vec - {arg_vec:?}");
     let _ = Command::new(default_ui)
-            .arg(repo_path_arg_name)
-            .arg(arg_string.clone())
-            .args(additional_args)
+            .args(arg_vec)
             .status()
             .expect("Failed to execute command");
 }
