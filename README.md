@@ -6,8 +6,8 @@ TODO:
 - Get tracking working on local system.
     - [x] Use repo path in notify watcher
     - [x] Get untrack working.
-    - [ ] Run gitui/lazygit/other from dotup
-- Get syncing working on local system.
+    - [ ] Run gitui/lazygit/other from updot
+    - [x] Get syncing working on local system.
 - Get syncing to pick up newly added files
 - Get notify/sync command working.
 - Get working for multiple systems (generalize home/local/config)

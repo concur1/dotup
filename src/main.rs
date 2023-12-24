@@ -48,12 +48,24 @@ fn untrack(args: Cli) {
     println!("File untracked.");
     }
 
-fn run(command: String) {
+fn run(command: String, repo_path: PathBuf) {
 
-Command::new("ls")
-        .stdin(Stdio::null())
-    .spawn()
-    .expect("ls command failed to start");
+    let tracking_data_path = fs::canonicalize(PathBuf::from(r"data.json")).expect("Error:");
+    let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
+
+    let repo_path_clone = repo_path.clone();
+    thread::spawn(move || {
+        //println!("test {repo_path:?}")
+        sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
+        });
+    let arg_string = format!("{}", repo_path.display());
+    println!("{arg_string}");
+    let status = Command::new("gitui")
+        .arg("-d")
+        .arg(arg_string)
+        .status()
+        .expect("Failed to execute command");
+    println!("Exited with status code: {}", status.code().unwrap());
 }
 
 fn main() {
@@ -63,7 +75,7 @@ fn main() {
     match args.action.as_ref() {
         "track" => track(args),
         "untrack" => untrack(args),
-        "run" => run("test".to_string()),//sync::sync::sync(&repo_path).expect("Syncing failed."),
+        "run" => run("test".to_string(), repo_path),
         _ => println!("other action:")
     }
 }
