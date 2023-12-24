@@ -9,8 +9,8 @@ TODO:
     - [x] Get untrack working.
     - [x] Get syncing working on local system.
     - [x] Get syncing to pick up newly added files
-- [ ] create config
-- [ ] Run gitui/lazygit/other from updot
+- [x] create config
+- [x] Run gitui/lazygit/other from updot
 - Add logging.
 - Get notify/sync command working.
 - Get working for multiple systems (generalize home/local/config)

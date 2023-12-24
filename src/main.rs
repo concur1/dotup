@@ -2,11 +2,11 @@ mod sync;
 mod filedata;
 use clap::Parser;
 use serde::{Serialize, Deserialize};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::fs;
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::thread;
-use toml::Table;
 
 
 
@@ -50,19 +50,36 @@ fn untrack(args: Cli) {
     println!("File untracked.");
     }
 
-fn launch_ui(command: String, repo_path: PathBuf) {
+fn launch_ui(repo_path: PathBuf) {
 
     filedata::filedata::get_config();
+    let config = filedata::filedata::get_config();
+    let default_ui = config.default_ui;
+    let uiconfig: HashMap<String, String> = config.ui_config.get(&default_ui).expect("Get nested hashmap:").to_owned();
+    println!("{default_ui:?}");
+    println!("{uiconfig:?}");
+    let repo_path_arg_name = uiconfig.get("repo_path_arg_name").expect("fail get repo path arg name:");
+    let additional_args  = uiconfig.get("additional_args").expect("Additional_args has not been supplied in the config. Set to an empty string if there are no args to be supplied.").split(" ").collect::<Vec<&str>>();
+
     let arg_string = format!("{}", repo_path.display());
-    let _ = Command::new("gitui")
-            .arg("-d")
+    if (additional_args.len() > 0) & (additional_args[0] != "") {
+    println!("additional_args - {additional_args:?}");
+    let _ = Command::new(default_ui)
+            .arg(repo_path_arg_name)
             .arg(arg_string)
-            .arg("--watcher")
+            .args(additional_args)
             .status()
             .expect("Failed to execute command");
+    } else {
+    let _ = Command::new(default_ui)
+            .arg(repo_path_arg_name)
+            .arg(arg_string)
+            .status()
+            .expect("Failed to execute command");
+    }
 }
 
-fn run(command: String, repo_path: PathBuf) {
+fn run(repo_path: PathBuf) {
 
     let tracking_data_path = fs::canonicalize(PathBuf::from(r"data.json")).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
@@ -72,7 +89,7 @@ fn run(command: String, repo_path: PathBuf) {
         //println!("test {repo_path:?}")
         sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
         });
-    launch_ui(command, repo_path);
+    launch_ui(repo_path);
 }
 
 fn main() {
@@ -82,7 +99,7 @@ fn main() {
     match args.action.as_ref() {
         "track" => track(args),
         "untrack" => untrack(args),
-        "run" => run("gitui".to_string(), repo_path),
+        "run" => run(repo_path),
         _ => println!("other action:")
     }
 }
