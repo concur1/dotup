@@ -5,12 +5,21 @@ use std::io::Read;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-
 #[derive(Serialize, Deserialize)]
 pub struct FileData {
     /// The path to the file to read
     pub paths: HashMap<PathBuf, PathBuf>
 }
+
+
+   
+#[derive(Serialize, Deserialize)]
+pub struct Config {
+   pub default_ui: String,
+   pub ui_config: HashMap<String, HashMap<String, String>>,
+}
+
+
 
 pub fn get_file_track_data () -> FileData {
     let tracking_data_path = PathBuf::from(r"data.json");
@@ -34,3 +43,13 @@ pub fn write_file_track_data (file_data: FileData) {
     let mut f = File::create(tracking_data_path).expect("Unable to create file");
     f.write_all(json_output_data.as_bytes()).expect("Unable to write data");
 }
+
+
+pub fn get_config () -> Config {
+    let mut read_data = String::new();
+    let mut read_file = File::open("config.toml").expect("Unable to open file");
+    read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
+    let toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");
+    return toml_output_data
+}
+

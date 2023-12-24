@@ -1,0 +1,5 @@
+default_ui = "gitui"
+
+[ui_config.gitui]
+additional_args = "--watcher"
+repo_path_arg_name = "-d"

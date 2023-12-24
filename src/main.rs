@@ -6,6 +6,9 @@ use std::path::PathBuf;
 use std::fs;
 use std::process::{Command, Stdio};
 use std::thread;
+use toml::Table;
+
+
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -19,7 +22,6 @@ struct Cli {
     /// The path to the file to read
     path: PathBuf,
 }
-
 
 fn track(args: Cli) {
     let abs_path = fs::canonicalize(&args.path).expect("Error getting absolute path.");
@@ -49,6 +51,8 @@ fn untrack(args: Cli) {
     }
 
 fn launch_ui(command: String, repo_path: PathBuf) {
+
+    filedata::filedata::get_config();
     let arg_string = format!("{}", repo_path.display());
     let _ = Command::new("gitui")
             .arg("-d")
