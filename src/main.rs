@@ -1,7 +1,7 @@
 mod sync;
 
 mod filedata;
-use clap::Parser;
+use clap::ArgMatches;
 use serde::{Serialize, Deserialize};
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
@@ -10,21 +10,15 @@ use std::process::Command;
 use std::thread;
 use clap;
 use std::env;
-use clap::{arg, command, value_parser, ArgAction, crate_version};
+use clap::{arg, command};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
     system_file_path: String,
 }
 
-#[derive(Parser)]
-struct Cli {
-    /// The pattern to look for
-    action: String,
-    /// The path to the file to read
-    path: PathBuf,
-}
-
+// Add suplied path to the list of files to track
+// * `path` - The path that is tracked.
 fn track(path: PathBuf) {
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut read_file_data = filedata::filedata::get_file_track_data();
@@ -39,6 +33,9 @@ fn track(path: PathBuf) {
     println!("File tracked.");
     }
 
+
+// Remove supplied path from the list of files to track
+// * `path` - The path that is tracked.
 fn untrack(path: PathBuf) {
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut read_file_data = filedata::filedata::get_file_track_data();
@@ -52,8 +49,9 @@ fn untrack(path: PathBuf) {
     println!("File untracked.");
     }
 
+// Start the ui.
+// * `repo_path` - The path to the repo.
 fn launch_ui(repo_path: PathBuf) {
-
     filedata::filedata::get_config();
     let config = filedata::filedata::get_config();
     let default_ui = config.default_ui;
@@ -85,7 +83,9 @@ fn launch_ui(repo_path: PathBuf) {
             .expect("Failed to execute command");
 }
 
-fn run(repo_path: PathBuf) {
+// Start a new thread that will use the sync function to sync as well as starting the default ui.
+// * `repo_path` - The path to the repo.
+fn run_ui(repo_path: PathBuf) {
     let tracking_data_path = fs::canonicalize(PathBuf::from(r"data.json")).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
@@ -95,6 +95,9 @@ fn run(repo_path: PathBuf) {
     launch_ui(repo_path);
 }
 
+// Call git based on the repo path an supplied args for git
+// * `repo_path` - The path to the repo.
+// * `git_args` - The args that have been supplied for git.
 fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
     let arg_string = format!("{}", repo_path.display());
     println!("git args: {git_args:?}");
@@ -106,10 +109,8 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
             .expect("Failed to execute command");
 }
 
-
-fn main() {
-    let repo_path = PathBuf::from("../dotup_test_repo");
-    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+// Use clap to create the cli, returning the matches.
+fn get_cli() -> ArgMatches {
     let matches = command!()
         //.version(crate_version!())
         .subcommand_required(true)
@@ -131,8 +132,14 @@ fn main() {
             clap::Command::new("ui")
                 .about("Run the git ui that is set to 'default' in the config.toml file.")
         ).get_matches();
+    matches   
+}
 
-    match matches.subcommand() {
+fn main() {
+    let repo_path = PathBuf::from("../dotup_test_repo");
+    env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
+
+    match get_cli().subcommand() {
         Some(("track", sub_matches)) => {
             let path = sub_matches.get_one::<String>("PATH").expect("fail");
             let path = PathBuf::from(path);
@@ -147,7 +154,7 @@ fn main() {
         },
         Some(("ui", _)) => {
             println!("running track");
-            run(repo_path);
+            run_ui(repo_path);
         },
         Some((ext, sub_matches)) => {
             println!("none");
@@ -166,8 +173,7 @@ fn main() {
             println!("all_args:{all_args:?}");
 
             git(repo_path, all_args);
-
-            
+           
         },
         _ => unreachable!(),
         }
