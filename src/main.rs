@@ -10,7 +10,7 @@ use std::process::Command;
 use std::thread;
 use clap;
 use std::env;
-use clap::{arg, command, value_parser, ArgAction};
+use clap::{arg, command, value_parser, ArgAction, crate_version};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -110,10 +110,8 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
 fn main() {
     let repo_path = PathBuf::from("../dotup_test_repo");
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
-    let matches = clap::Command::new("MyApp")
-        .version("1.0")
-        .author("Kevin K. <kbknapp@gmail.com>")
-        .about("Does awesome things")
+    let matches = command!()
+        //.version(crate_version!())
         .subcommand_required(true)
         .arg_required_else_help(true)
         .allow_external_subcommands(true)
@@ -160,7 +158,6 @@ fn main() {
                 .collect::<Vec<_>>();
             println!("ext:{ext:?}");
             println!("args:{args:?}");
-            //let args = vec![&OsString::from(ext)].append(args);
             let ext = OsString::from(ext);
             let mut all_args = vec![&ext];
             all_args.append(args);
