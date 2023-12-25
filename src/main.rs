@@ -1,14 +1,16 @@
 mod sync;
+
 mod filedata;
 use clap::Parser;
 use serde::{Serialize, Deserialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
 use std::fs;
 use std::process::Command;
 use std::thread;
-
-
+use clap;
+use std::env;
+use clap::{arg, command, value_parser, ArgAction};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -23,8 +25,8 @@ struct Cli {
     path: PathBuf,
 }
 
-fn track(args: Cli) {
-    let abs_path = fs::canonicalize(&args.path).expect("Error getting absolute path.");
+fn track(path: PathBuf) {
+    let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut read_file_data = filedata::filedata::get_file_track_data();
     if read_file_data.paths.contains_key(&abs_path) {
         println!("{abs_path:?} is already tracked.");
@@ -37,8 +39,8 @@ fn track(args: Cli) {
     println!("File tracked.");
     }
 
-fn untrack(args: Cli) {
-    let abs_path = fs::canonicalize(&args.path).expect("Error getting absolute path.");
+fn untrack(path: PathBuf) {
+    let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut read_file_data = filedata::filedata::get_file_track_data();
     if !!!read_file_data.paths.contains_key(&abs_path) {
         println!("{abs_path:?} is not tracked.");
@@ -93,26 +95,88 @@ fn run(repo_path: PathBuf) {
     launch_ui(repo_path);
 }
 
-//fn git(repo_path: PathBuf, git_args: Vec<String>) {
-//    let arg_string = format!("{}", repo_path.display());
-//    let _ = Command::new("git")
-//            .arg("-C")
-//            .arg(arg_string)
-//            .status()
-//            .expect("Failed to execute command");
-//}
+fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
+    let arg_string = format!("{}", repo_path.display());
+    println!("git args: {git_args:?}");
+    let _ = Command::new("git")
+            .arg("-C")
+            .arg(arg_string)
+            .args(git_args)
+            .status()
+            .expect("Failed to execute command");
+}
+
 
 fn main() {
     let repo_path = PathBuf::from("../dotup_test_repo");
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
-    let args = Cli::parse();
-    match args.action.as_ref() {
-        "track" => track(args),
-        "untrack" => untrack(args),
-        "run" => run(repo_path),
-        _ => println!("other action:")
-    }
+    let matches = clap::Command::new("MyApp")
+        .version("1.0")
+        .author("Kevin K. <kbknapp@gmail.com>")
+        .about("Does awesome things")
+        .subcommand_required(true)
+        .arg_required_else_help(true)
+        .allow_external_subcommands(true)
+        .subcommand(
+            clap::Command::new("track")
+                .about("Add a file to the list of files to be tacked.")
+                .arg(arg!(<PATH> "The path of the file."))
+                .arg_required_else_help(true),
+        )
+        .subcommand(
+            clap::Command::new("untrack")
+                .about("Remove a file to the list of files to be tacked.")
+                .arg(arg!(<PATH> "The path of the file."))
+                .arg_required_else_help(true),
+        )
+        .subcommand(
+            clap::Command::new("ui")
+                .about("Run the git ui that is set to 'default' in the config.toml file.")
+        ).get_matches();
+
+    match matches.subcommand() {
+        Some(("track", sub_matches)) => {
+            let path = sub_matches.get_one::<String>("PATH").expect("fail");
+            let path = PathBuf::from(path);
+            println!("running untrack {path:?}");
+            track(path.to_owned());
+        },
+        Some(("untrack", sub_matches)) => {
+            let path = sub_matches.get_one::<String>("PATH").expect("fail");
+            let path = PathBuf::from(path);
+            println!("running untrack {path:?}");
+            untrack(path.to_owned());
+        },
+        Some(("ui", _)) => {
+            println!("running track");
+            run(repo_path);
+        },
+        Some((ext, sub_matches)) => {
+            println!("none");
+            let args = &mut sub_matches
+                .get_many::<OsString>("")
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
+            println!("ext:{ext:?}");
+            println!("args:{args:?}");
+            //let args = vec![&OsString::from(ext)].append(args);
+            let ext = OsString::from(ext);
+            let mut all_args = vec![&ext];
+            all_args.append(args);
+
+            println!("ext:{ext:?}");
+            println!("all_args:{all_args:?}");
+
+            git(repo_path, all_args);
+
+            
+        },
+        _ => unreachable!(),
+        }
+    ;
 }
+
 
 
 

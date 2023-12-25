@@ -24,3 +24,7 @@ TODO:
     - test gitui/lazygit launches ect
     - Fix warnings.
 - Create just file with linting/tests.
+
+some cases to consider:
+- a file is merged into a system that doesn't need it, the file is untracked. Should the file still exist?
+- should untack only work if the file exists locally or should we copy the file locally before using it?
