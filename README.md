@@ -6,7 +6,7 @@ Initialize a repository
 ```
 dotup init
 ```
-or
+**or**
 Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 ```
 dotup clone <url> .
@@ -29,7 +29,7 @@ If a TUI or GUI application such as GitUi, LazyGit, GitKraken is installed and s
 ```
 dotup ui
 ```
-
+**or**
 Add files/changes to git with dotup followed by a git command
 ```
 dotup status 
