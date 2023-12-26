@@ -6,7 +6,7 @@ Initialize a repository
 ```
 dotup init
 ```
-
+or
 Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 ```
 dotup clone <url> .
