@@ -1,33 +1,36 @@
 ## dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
-### Initialize a new repository
+#### Setup
+Initialize a new repository
 ```
 dotup init
 ```
 
-### Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
+Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 ```
 dotup clone <url> .
 ```
 
-### Add a file to the list of tracked files
+
+#### Tracking files
+Add a file to the list of tracked files
 ```
 dotup track <important file>
 ```
-
-### Remove a file from the list of tracked files
+Remove a file from the list of tracked files
 ```
 dotup untrack <important file>
 ```
 
-### Run the git ui application that is specified in the config.toml
-If a TUI or GUI application such as GitUi, LazyGit, GitKraken is installed and specified in metadata it will be launched with the directory set to the dotfiles rpeo.
+#### Use command line git or a git GUI/TUI application
+Run the git ui application that is specified in the config.toml
+If a TUI or GUI application such as GitUi, LazyGit, GitKraken is installed and specified in metadata it will be launched with the directory set to the dotfiles repo.
 ```
 dotup ui
 ```
 
-### Add files/changes to git with dotup followed by a git command
+Add files/changes to git with dotup followed by a git command
 ```
 dotup status 
 dotup add <important file>
