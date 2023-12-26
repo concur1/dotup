@@ -101,6 +101,7 @@ fn run_ui(repo_path: PathBuf) {
 fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
     let arg_string = format!("{}", repo_path.display());
     println!("git args: {git_args:?}");
+    println!("repo_path: {repo_path:?}");
     let _ = Command::new("git")
             .arg("-C")
             .arg(arg_string)
@@ -136,7 +137,14 @@ fn get_cli() -> ArgMatches {
 }
 
 fn main() {
-    let repo_path = PathBuf::from("../dotup_test_repo");
+    let config = filedata::filedata::get_config();
+    let profile = config.repo_name;
+    let all_repos_path = PathBuf::from("../dotup_test_repo/");
+    let mut repo_path = all_repos_path;
+    repo_path.push(profile);
+    let _ = fs::create_dir_all(repo_path.clone());
+    
+    
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     match get_cli().subcommand() {

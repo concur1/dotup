@@ -1,4 +1,5 @@
 default_ui = "gitui" # The git ui will be used when runnin 'updot run'
+repo_name = "default" # The repo_name to be used. Different repo_name's allow initialisation of and connection to different git repositories.
 
 [ui_config.gitui]
 repo_path_arg_name = "--directory" # Only the flag that is used to supply the directory of the git repo

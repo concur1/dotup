@@ -16,6 +16,7 @@ pub struct FileData {
 #[derive(Serialize, Deserialize)]
 pub struct Config {
    pub default_ui: String,
+   pub repo_name: String,
    pub ui_config: HashMap<String, HashMap<String, String>>,
 }
 
