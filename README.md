@@ -1,8 +1,8 @@
 ## dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
-#### Setup
-Initialize a new repository
+### Setup
+Initialize a repository
 ```
 dotup init
 ```
@@ -13,7 +13,7 @@ dotup clone <url> .
 ```
 
 
-#### Tracking files
+### Tracking files
 Add a file to the list of tracked files
 ```
 dotup track <important file>
@@ -23,7 +23,7 @@ Remove a file from the list of tracked files
 dotup untrack <important file>
 ```
 
-#### Use command line git or a git GUI/TUI application
+### Use command line git or a git GUI/TUI application
 Run the git ui application that is specified in the config.toml
 If a TUI or GUI application such as GitUi, LazyGit, GitKraken is installed and specified in metadata it will be launched with the directory set to the dotfiles repo.
 ```
@@ -47,12 +47,11 @@ TODO:
 - [x] create config
 - [x] Run gitui/lazygit/other from updot
 - [x] Update to use git commands
-- add profiles
-- rename data.json
-- add consts for repo path and data.json 
+- [x] add repo_names
+- rename data.json and move to be in the repo
 - Add logging.
 - Get working for multiple systems (generalize home/local/config)
-- change name to updot
+- change name to dotup
 - add additional info to updot status
 - Create tests:
     - test track
