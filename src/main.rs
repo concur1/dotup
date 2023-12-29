@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::fs;
 use std::process::Command;
 use clap;
-use dirs::{self, config_dir};
+use dirs;
 use std::env;
 use clap::{arg, command};
 use std::thread;

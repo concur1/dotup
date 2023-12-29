@@ -26,7 +26,7 @@ pub struct Config {
 pub fn get_config_path() -> PathBuf {
     let mut path = dirs::config_dir().expect("Error, could not find config dir:");
     path.push("dotup");
-    path.push("config3.toml");
+    path.push("config.toml");
     path
 }
 
@@ -35,7 +35,6 @@ pub fn get_config () -> Config {
     if !!!get_config_path().exists() {
         create_default_config_file();
     }
-    let config_path = get_config_path();
     let mut read_file = File::open(get_config_path()).expect("Unable to open file");
     read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
     let toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");

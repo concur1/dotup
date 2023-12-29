@@ -5,7 +5,6 @@ use notify;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
 use crate::filedata::filedata;
-use crate::init_repo;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
