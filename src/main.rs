@@ -4,12 +4,14 @@ mod filedata;
 use clap::ArgMatches;
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
+use std::path::Path;
 use std::fs;
 use std::process::Command;
-use std::thread;
 use clap;
 use std::env;
 use clap::{arg, command};
+use std::{thread, time::Duration};
+
 
 // Add suplied path to the list of files to track
 // * `path` - The path that is tracked.
@@ -139,15 +141,35 @@ fn get_cli() -> ArgMatches {
     matches   
 }
 
+// Initialise the repo if it has not already been initialized.
+// * `repo_path` - The path to the repo.
+fn init_repo(repo_path: PathBuf) {
+    let mut mut_repo_path = repo_path.clone();
+    mut_repo_path.push(".git");
+    if mut_repo_path.exists() {
+        return
+    }
+    let _ = fs::create_dir_all(repo_path.clone());
+    let arg_string = format!("{}", repo_path.display());
+    let git_args = ["init"];
+    println!("git args: {git_args:?}");
+    println!("repo_path: {repo_path:?}");
+    let _ = Command::new("git")
+            .arg("-C")
+            .arg(arg_string)
+            .args(git_args)
+            .status()
+            .expect("Failed to execute command");
+    }
+
+
 fn main() {
     let config = filedata::filedata::get_config();
     let profile = config.repo_name;
-    let all_repos_path = PathBuf::from("../dotup_test_repo/");
+    let all_repos_path = PathBuf::from("./dotup_test_repo/");
     let mut repo_path = all_repos_path;
     repo_path.push(profile);
-    let _ = fs::create_dir_all(repo_path.clone());
-    
-    
+    init_repo(repo_path.clone());
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     match get_cli().subcommand() {

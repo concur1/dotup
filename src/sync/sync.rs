@@ -1,7 +1,8 @@
 use std::fs;
 use std::time::UNIX_EPOCH;
 use serde::{Serialize, Deserialize};
-use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher, Event};
+use notify;
+use notify::{RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
 use crate::filedata::filedata;
 
@@ -11,6 +12,13 @@ struct T {
 }
 
 
+fn sync_all(config: filedata::Config) {
+    let files_to_track = config.files.get("nixos").expect("get nixos files error:");
+    for (key_path, abs_repo_path) in files_to_track.clone().into_iter() {
+        let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
+        sync_files(&key_path, &dest_path_final).expect("Error with initial file syncing");
+    }
+}
 
 // Syncs the files specified in the configureation with the supplied repository path.
 //
@@ -23,16 +31,16 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     // println!("repo path: {repo_path:?}");
     let data = filedata::get_config(); 
     let files_to_track = data.files.get("nixos").expect("get nixos files error:");
-
-    let (tx, rx) = std::sync::mpsc::channel();
-    // Automatically select the best implementation for your platform.
-    // You can also access each implementation directly e.g. INotifyWatcher.
-    let mut watcher = RecommendedWatcher::new(tx, Config::default()).expect("Error:");
-
     for (key_path, _) in files_to_track.clone().into_iter() {
         let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
         sync_files(&key_path, &dest_path_final).expect("Error with initial file syncing");
     }
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    // Automatically select the best implementation for your platform.
+    // You can also access each implementation directly e.g. INotifyWatcher.
+    let mut watcher = RecommendedWatcher::new(tx, notify::Config::default()).expect("Error:");
+
 
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
