@@ -12,21 +12,28 @@ use dirs;
 use std::env;
 use clap::{arg, command};
 use std::thread;
+use gethostname;
 
+fn get_hostname() -> String {
+    let hostname = gethostname::gethostname().into_string();
+    let hostname = hostname.expect("hostname");
+    hostname
+}
 
 // Add suplied path to the list of files to track
 // * `path` - The path that is tracked.
 fn track(path: PathBuf) {
+    let hostname = get_hostname();
     let abs_local_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut config = filedata::filedata::get_config();
-    let files_map = config.files.get("nixos").expect("get files map error:");
+    let files_map = config.files.get(&hostname).expect("get files map error:");
     let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
     if local_files.contains(&abs_local_path) {
         println!("{abs_local_path:?} is already tracked.");
         return
     }
     let generic_path = abs_local_path.clone();
-    let files_map = config.files.get_mut("nixos").expect("get nixos.");
+    let files_map = config.files.get_mut(&hostname).expect("get nixos.");
 
     files_map.insert(generic_path, abs_local_path);
     filedata::filedata::write_config(config);
@@ -41,16 +48,17 @@ fn find_key_for_value<'a>(map: HashMap<PathBuf, PathBuf>, value: &PathBuf) -> Op
 // Remove supplied path from the list of files to track
 // * `path` - The path that is tracked.
 fn untrack(path: PathBuf) {
+    let hostname = get_hostname();
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut config = filedata::filedata::get_config();
-    let files_map = config.files.get("nixos").expect("get files map error:");
+    let files_map = config.files.get(&hostname).expect("get files map error:");
     let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
     if !!!local_files.contains(&abs_path) {
         println!("{abs_path:?} is not tracked.");
         return
     }
     let repo_abs_path = find_key_for_value(files_map.clone(), &abs_path).expect("get repo path error:");
-    let files_map = config.files.get_mut("nixos").expect("get nixos.");
+    let files_map = config.files.get_mut(&hostname).expect("get nixos.");
     files_map.remove(&repo_abs_path);
     filedata::filedata::write_config(config);
     println!("File tracked.");
@@ -146,23 +154,23 @@ fn get_cli(repo_path: PathBuf) -> ArgMatches {
 
 // Initialise the repo if it has not already been initialized.
 // * `repo_path` - The path to the repo.
-fn init_repo(repo_path: PathBuf) {
+fn init_repo_dir(repo_path: PathBuf) {
     let mut mut_repo_path = repo_path.clone();
     mut_repo_path.push(".git");
     if mut_repo_path.exists() {
         return
     }
     let _ = fs::create_dir_all(repo_path.clone());
-    let arg_string = format!("{}", repo_path.display());
-    let git_args = ["init"];
-    println!("git args: {git_args:?}");
-    println!("repo_path: {repo_path:?}");
-    let _ = Command::new("git")
-            .arg("-C")
-            .arg(arg_string)
-            .args(git_args)
-            .status()
-            .expect("Failed to execute command");
+    //let arg_string = format!("{}", repo_path.display());
+    //let git_args = ["init"];
+    //println!("git args: {git_args:?}");
+    //println!("repo_path: {repo_path:?}");
+    //let _ = Command::new("git")
+    //        .arg("-C")
+    //        .arg(arg_string)
+    //        .args(git_args)
+    //        .status()
+    //        .expect("Failed to execute command");
     }
 
 
@@ -173,7 +181,7 @@ fn main() {
     repo_path.push("dotup_test_repo/");
     let profile = config.repo_name;
     repo_path.push(profile);
-    init_repo(repo_path.clone());
+    init_repo_dir(repo_path.clone());
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     match get_cli(repo_path.clone()).subcommand() {

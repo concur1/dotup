@@ -7,6 +7,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use dirs;
 
+use crate::get_hostname;
+
 #[derive(Serialize, Deserialize)]
 pub struct FileData {
     /// The path to the file to read
@@ -59,7 +61,7 @@ pub fn write_config (config: Config) {
 fn create_default_config_file() {
     let nixos = HashMap::new();
     let file_config = HashMap::from([
-    ("nixos".to_owned(), nixos),
+    (get_hostname().to_owned(), nixos),
     ]);
     let gitui = HashMap::from([
     ("repo_path_arg_name".to_owned(), "--directory".to_owned()),

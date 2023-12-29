@@ -5,6 +5,7 @@ use notify;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
 use crate::filedata::filedata;
+use crate::get_hostname;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
@@ -28,7 +29,7 @@ fn dest_path(path: &Path, repo_path: &Path) -> PathBuf {
 
 pub fn sync_all(config: filedata::Config, repo_path: &Path) {
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
-    let files_to_track = config.files.get("nixos").expect("get nixos files error:");
+    let files_to_track = config.files.get(&get_hostname()).expect("get nixos files error:");
     for (local_path, system_path) in files_to_track.clone().into_iter() {
         let file_repo_abs_path = repo_to_abs_repo(&local_path, &abs_repo_path);
         sync_files(&system_path, &file_repo_abs_path).expect("Error with initial file syncing");
@@ -58,7 +59,7 @@ fn abs_repo_to_system(path: &Path, repo_path: &Path) -> PathBuf {
 pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_json::Error> {
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let data = filedata::get_config(); 
-    let files_to_track = data.files.get("nixos").expect("get nixos files error:");
+    let files_to_track = data.files.get(&get_hostname()).expect("get nixos files error:");
     sync_all(filedata::get_config(), repo_path);
 
     let (tx, rx) = std::sync::mpsc::channel();
