@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use dirs;
 
 #[derive(Serialize, Deserialize)]
 pub struct FileData {
@@ -22,13 +23,21 @@ pub struct Config {
    pub files: HashMap<String, HashMap<PathBuf, PathBuf>>,
 }
 
+pub fn get_config_path() -> PathBuf {
+    let mut path = dirs::config_dir().expect("Error, could not find config dir:");
+    path.push("dotup");
+    path.push("config3.toml");
+    path
+}
 
 pub fn get_config () -> Config {
     let mut read_data = String::new();
-    if !!!Path::new("config3.toml").exists() {
+    if !!!get_config_path().exists() {
         create_default_config_file();
     }
-    let mut read_file = File::open("config3.toml").expect("Unable to open file");
+    let config_path = get_config_path();
+    println!("get config path: {config_path:?}");
+    let mut read_file = File::open(get_config_path()).expect("Unable to open file");
     read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
     let toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");
     return toml_output_data
@@ -41,8 +50,12 @@ pub struct Config2 {
 }
 
 pub fn write_config (config: Config) {
+    let config_path = get_config_path();
+    let prefix: &Path = config_path.parent().expect("cant");
+    fs::create_dir_all(prefix).unwrap();
+    println!("create dir: {prefix:?}");
     let toml_output_data: String = toml::to_string(&config).expect("toml fail.");
-    fs::write("config3.toml", toml_output_data).expect("Unable to write file");
+    fs::write(get_config_path(), toml_output_data).expect("Unable to write file");
 }
 
 fn create_default_config_file() {

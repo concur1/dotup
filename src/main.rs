@@ -5,13 +5,13 @@ use clap::ArgMatches;
 use filedata::filedata::get_config;
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
-use std::path::Path;
 use std::fs;
 use std::process::Command;
 use clap;
+use dirs::{self, config_dir};
 use std::env;
 use clap::{arg, command};
-use std::{thread, time::Duration};
+use std::thread;
 
 
 // Add suplied path to the list of files to track
@@ -93,7 +93,7 @@ fn launch_ui(repo_path: PathBuf) {
 // Start a new thread that will use the sync function to sync as well as starting the default ui.
 // * `repo_path` - The path to the repo.
 fn run_ui(repo_path: PathBuf) {
-    let tracking_data_path = fs::canonicalize(PathBuf::from(r"config3.toml")).expect("Error:");
+    let tracking_data_path = fs::canonicalize(filedata::filedata::get_config_path()).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
@@ -168,9 +168,10 @@ fn init_repo(repo_path: PathBuf) {
 
 fn main() {
     let config = filedata::filedata::get_config();
+    let mut repo_path = dirs::data_dir().expect("No data directory found.");
+    repo_path.push("dotup/");
+    repo_path.push("dotup_test_repo/");
     let profile = config.repo_name;
-    let all_repos_path = PathBuf::from("./dotup_test_repo/");
-    let mut repo_path = all_repos_path;
     repo_path.push(profile);
     init_repo(repo_path.clone());
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
