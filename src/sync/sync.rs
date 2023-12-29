@@ -21,8 +21,8 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
 
     // println!("repo path: {repo_path:?}");
-    let data = filedata::get_file_track_data(); 
-    let files_to_track = data.paths;
+    let data = filedata::get_config(); 
+    let files_to_track = data.files.get("nixos").expect("get nixos files error:");
 
     let (tx, rx) = std::sync::mpsc::channel();
     // Automatically select the best implementation for your platform.

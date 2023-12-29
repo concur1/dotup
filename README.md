@@ -60,7 +60,22 @@ TODO:
     - test gitui/lazygit launches ect
     - Fix warnings.
 - Create just file with linting/tests.
+- is 'track' the right word? Maybe 'mirror' is better?
 
 some cases to consider:
 - a file is merged into a system that doesn't need it, the file is untracked. Should the file still exist?
 - should untack only work if the file exists locally or should we copy the file locally before using it?
+- merging/cloning a repo with files more recent than the system files will lead to the system files being lost.
+    - soln1 - create a seperate repo that only contains backups of the system files.
+    - soln2 - detect when a clone/merge is going to overwrite system files
+    - soln3 - only copy from system to the repo and never from the repo to the system.
+    - soln4 - use `git pull --allow-unrelated-histories` and disallow/raise error for clone.
+    - soln5 - make tracking seperate. Check if the tracking files match before allowing merge/pull1.
+    - soln6 - have apply command that will apply the local repo to the system files.
+        - This apply command will :
+            - check that there is no merge conflict in the repo
+            - check that the the tracked files in the repo are a subset of the system tracked files. 
+            If there are repo tracked files that are not in system then raise a error/warning/options: "Additional Tracked files detected in local repo. Add these to the list of tracked files."
+
+    - soln7 - Do not use a shared tracked files file. Instead each file will be specified locally or with a config file.
+        - if using cli to specify files to track

@@ -21,32 +21,41 @@ struct T {
 // * `path` - The path that is tracked.
 fn track(path: PathBuf) {
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
-    let mut read_file_data = filedata::filedata::get_file_track_data();
-    if read_file_data.paths.contains_key(&abs_path) {
+    let mut config = filedata::filedata::get_config();
+    let files_map = config.files.get("nixos").expect("get files map error:");
+    let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
+    if local_files.contains(&abs_path) {
         println!("{abs_path:?} is already tracked.");
         return
     }
     let generic_path = abs_path.clone();
-    read_file_data.paths.insert(abs_path, generic_path);
-    let file_data = filedata::filedata::FileData { paths: read_file_data.paths };
-    filedata::filedata::write_file_track_data(file_data);
+    let files_map = config.files.get_mut("nixos").expect("get nixos.");
+    files_map.insert(abs_path, generic_path);
+    filedata::filedata::write_config(config);
     println!("File tracked.");
     }
 
+fn find_key_for_value<'a>(map: HashMap<PathBuf, PathBuf>, value: &PathBuf) -> Option<PathBuf> {
+    map.iter()
+        .find_map(|(key, val)| if val == value { Some(key.clone()) } else { None })
+}
 
 // Remove supplied path from the list of files to track
 // * `path` - The path that is tracked.
 fn untrack(path: PathBuf) {
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
-    let mut read_file_data = filedata::filedata::get_file_track_data();
-    if !!!read_file_data.paths.contains_key(&abs_path) {
+    let mut config = filedata::filedata::get_config();
+    let files_map = config.files.get("nixos").expect("get files map error:");
+    let repo_abs_path = find_key_for_value(files_map.clone(), &abs_path).expect("get repo path error:");
+    let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
+    if !!!local_files.contains(&abs_path) {
         println!("{abs_path:?} is not tracked.");
         return
     }
-    read_file_data.paths.remove(&abs_path);
-    let file_data = filedata::filedata::FileData { paths: read_file_data.paths };
-    filedata::filedata::write_file_track_data(file_data);
-    println!("File untracked.");
+    let files_map = config.files.get_mut("nixos").expect("get nixos.");
+    files_map.remove(&repo_abs_path);
+    filedata::filedata::write_config(config);
+    println!("File tracked.");
     }
 
 // Start the ui.
@@ -86,7 +95,7 @@ fn launch_ui(repo_path: PathBuf) {
 // Start a new thread that will use the sync function to sync as well as starting the default ui.
 // * `repo_path` - The path to the repo.
 fn run_ui(repo_path: PathBuf) {
-    let tracking_data_path = fs::canonicalize(PathBuf::from(r"data.json")).expect("Error:");
+    let tracking_data_path = fs::canonicalize(PathBuf::from(r"config3.toml")).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
