@@ -12,11 +12,6 @@ use clap;
 use std::env;
 use clap::{arg, command};
 
-#[derive(Debug, Serialize, Deserialize)]
-struct T {
-    system_file_path: String,
-}
-
 // Add suplied path to the list of files to track
 // * `path` - The path that is tracked.
 fn track(path: PathBuf) {
@@ -46,12 +41,12 @@ fn untrack(path: PathBuf) {
     let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut config = filedata::filedata::get_config();
     let files_map = config.files.get("nixos").expect("get files map error:");
-    let repo_abs_path = find_key_for_value(files_map.clone(), &abs_path).expect("get repo path error:");
     let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
     if !!!local_files.contains(&abs_path) {
         println!("{abs_path:?} is not tracked.");
         return
     }
+    let repo_abs_path = find_key_for_value(files_map.clone(), &abs_path).expect("get repo path error:");
     let files_map = config.files.get_mut("nixos").expect("get nixos.");
     files_map.remove(&repo_abs_path);
     filedata::filedata::write_config(config);
