@@ -36,7 +36,6 @@ pub fn get_config () -> Config {
         create_default_config_file();
     }
     let config_path = get_config_path();
-    println!("get config path: {config_path:?}");
     let mut read_file = File::open(get_config_path()).expect("Unable to open file");
     read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
     let toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");

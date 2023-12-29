@@ -32,7 +32,6 @@ pub fn sync_all(config: filedata::Config, repo_path: &Path) {
     let files_to_track = config.files.get("nixos").expect("get nixos files error:");
     for (local_path, system_path) in files_to_track.clone().into_iter() {
         let file_repo_abs_path = repo_to_abs_repo(&local_path, &abs_repo_path);
-        println!("syncing files: {system_path:?}, {file_repo_abs_path:?}");
         sync_files(&system_path, &file_repo_abs_path).expect("Error with initial file syncing");
     }
 }
