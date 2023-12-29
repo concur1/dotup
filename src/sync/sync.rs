@@ -5,19 +5,51 @@ use notify;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
 use crate::filedata::filedata;
+use crate::init_repo;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct T {
     system_file_path: String,
 }
 
-
-fn sync_all(config: filedata::Config) {
-    let files_to_track = config.files.get("nixos").expect("get nixos files error:");
-    for (key_path, abs_repo_path) in files_to_track.clone().into_iter() {
-        let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
-        sync_files(&key_path, &dest_path_final).expect("Error with initial file syncing");
+// Returns the 'dest_path'. If the system path is supplied as 'path' then a repository path
+// will be returned in the dest_path. If a repo path is supplied then a system path will eb returned.
+//
+// # Arguments
+//
+// * `path` - The supplied path, either a system filepath or a repo filepath.
+// * `repo_path` - The path to the git repository that is being used to abckup files.
+fn dest_path(path: &Path, repo_path: &Path) -> PathBuf {
+    if path.starts_with(repo_path) {
+        abs_repo_to_system(path, repo_path)
+    } else {
+        system_to_repo(path, repo_path)
     }
+}
+
+pub fn sync_all(config: filedata::Config, repo_path: &Path) {
+    let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
+    let files_to_track = config.files.get("nixos").expect("get nixos files error:");
+    for (local_path, system_path) in files_to_track.clone().into_iter() {
+        let file_repo_abs_path = repo_to_abs_repo(&local_path, &abs_repo_path);
+        println!("syncing files: {system_path:?}, {file_repo_abs_path:?}");
+        sync_files(&system_path, &file_repo_abs_path).expect("Error with initial file syncing");
+    }
+}
+
+fn system_to_repo(path: &Path, repo_path: &Path) -> PathBuf {
+    let dest = repo_path.to_path_buf();
+    dest.join(path.strip_prefix("/").expect("Not a prefix."))
+}
+
+fn repo_to_abs_repo(path: &Path, repo_path: &Path) -> PathBuf {
+    let path = path.strip_prefix("/").expect("strip prefix error:");
+    repo_path.join(path)
+}
+
+fn abs_repo_to_system(path: &Path, repo_path: &Path) -> PathBuf {
+    let dest = Path::new("/").join(path.strip_prefix(repo_path).expect("Not a prefix.")).to_path_buf();
+    dest
 }
 
 // Syncs the files specified in the configureation with the supplied repository path.
@@ -27,14 +59,9 @@ fn sync_all(config: filedata::Config) {
 // * 'repo_path' The path of the repo to sync with.
 pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_json::Error> {
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
-
-    // println!("repo path: {repo_path:?}");
     let data = filedata::get_config(); 
     let files_to_track = data.files.get("nixos").expect("get nixos files error:");
-    for (key_path, _) in files_to_track.clone().into_iter() {
-        let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
-        sync_files(&key_path, &dest_path_final).expect("Error with initial file syncing");
-    }
+    sync_all(filedata::get_config(), repo_path);
 
     let (tx, rx) = std::sync::mpsc::channel();
     // Automatically select the best implementation for your platform.
@@ -45,12 +72,12 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
     watcher.watch(tracking_data_path, RecursiveMode::Recursive).expect("Error:");
-    for (key_path, _) in files_to_track.into_iter() {
-        watcher.watch(Path::new(&key_path),RecursiveMode::Recursive).expect("Error:");
-        let dest_path_final = Path::new(&dest_path(&key_path, &abs_repo_path)).to_owned();
+    for (local_path, system_path) in files_to_track.clone().into_iter() {
+        let file_repo_abs_path = repo_to_abs_repo(&local_path, &repo_path);
+        watcher.watch(Path::new(&system_path),RecursiveMode::Recursive).expect("Error:");
         // println!("(key_path {key_path:?})");
         // println!("(dest_path_final {dest_path_final:?})");
-        watcher.watch(Path::new(&dest_path_final), RecursiveMode::Recursive).expect("Error (repo_path {abs_repo_path:?})");
+        watcher.watch(Path::new(&file_repo_abs_path), RecursiveMode::Recursive).expect("Error (repo_path {abs_repo_path:?})");
     }
     for res in rx {
         match res {
@@ -72,24 +99,6 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_jso
     Ok(())
 }
 
-// Returns the 'dest_path'. If the system path is supplied as 'path' then a repository path
-// will be returned in the dest_path. If a repo path is supplied then a system path will eb returned.
-//
-// # Arguments
-//
-// * `path` - The supplied path, either a system filepath or a repo filepath.
-// * `repo_path` - The path to the git repository that is being used to abckup files.
-fn dest_path(path: &Path, repo_path: &Path) -> PathBuf {
-    if path.starts_with(repo_path) {
-        let dest = Path::new("/").join(path.strip_prefix(repo_path).expect("Not a prefix.")).to_path_buf();
-        // println!("starts with repo. {repo_path:?}, {path:?}, {dest:?}");
-        dest.to_path_buf()
-    } else {
-        let dest = repo_path.join(path.strip_prefix("/").expect("No prefix."));
-        // println!("doesn't starts with repo. {repo_path:?}, {path:?}, {dest:?}");
-        dest.to_path_buf()
-    }
-}
 
 // Runs on an event triggered by the notify watcher.
 //
@@ -103,6 +112,7 @@ fn event_handler(event: Event, repo_path: &Path) {
     if event.kind.is_modify() {
         for path in event.paths {
             let dest_path = dest_path(&path, repo_path);
+            //println!("event path:{path:?}, dest_path: {dest_path:?}");
             sync_files(&path, &dest_path).expect("Error:");    
             //println!("Files syncing: {path:?} -> {dest_path:?}");
         }

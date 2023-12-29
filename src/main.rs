@@ -2,6 +2,7 @@ mod sync;
 
 mod filedata;
 use clap::ArgMatches;
+use filedata::filedata::get_config;
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
 use std::path::Path;
@@ -16,17 +17,18 @@ use std::{thread, time::Duration};
 // Add suplied path to the list of files to track
 // * `path` - The path that is tracked.
 fn track(path: PathBuf) {
-    let abs_path = fs::canonicalize(&path).expect("Error getting absolute path.");
+    let abs_local_path = fs::canonicalize(&path).expect("Error getting absolute path.");
     let mut config = filedata::filedata::get_config();
     let files_map = config.files.get("nixos").expect("get files map error:");
     let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
-    if local_files.contains(&abs_path) {
-        println!("{abs_path:?} is already tracked.");
+    if local_files.contains(&abs_local_path) {
+        println!("{abs_local_path:?} is already tracked.");
         return
     }
-    let generic_path = abs_path.clone();
+    let generic_path = abs_local_path.clone();
     let files_map = config.files.get_mut("nixos").expect("get nixos.");
-    files_map.insert(abs_path, generic_path);
+
+    files_map.insert(generic_path, abs_local_path);
     filedata::filedata::write_config(config);
     println!("File tracked.");
     }
@@ -116,7 +118,8 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
 }
 
 // Use clap to create the cli, returning the matches.
-fn get_cli() -> ArgMatches {
+fn get_cli(repo_path: PathBuf) -> ArgMatches {
+    sync::sync::sync_all(get_config(), &repo_path);
     let matches = command!()
         //.version(crate_version!())
         .subcommand_required(true)
@@ -172,7 +175,7 @@ fn main() {
     init_repo(repo_path.clone());
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
-    match get_cli().subcommand() {
+    match get_cli(repo_path.clone()).subcommand() {
         Some(("track", sub_matches)) => {
             let path = sub_matches.get_one::<String>("PATH").expect("fail");
             let path = PathBuf::from(path);

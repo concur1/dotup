@@ -12,7 +12,6 @@ Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 dotup clone <url> .
 ```
 
-
 ### Tracking files
 Add a file to the list of tracked files
 ```
