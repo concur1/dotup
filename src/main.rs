@@ -29,7 +29,6 @@ fn track(path: PathBuf) {
     let files_map = config.files.get(&hostname).expect("get files map error:");
     let local_files: Vec<PathBuf> = files_map.values().cloned().collect();
     if local_files.contains(&abs_local_path) {
-        println!("{abs_local_path:?} is already tracked.");
         return
     }
     let generic_path = abs_local_path.clone();
@@ -61,7 +60,7 @@ fn untrack(path: PathBuf) {
     let files_map = config.files.get_mut(&hostname).expect("get nixos.");
     files_map.remove(&repo_abs_path);
     filedata::filedata::write_config(config);
-    println!("File tracked.");
+    println!("File untracked.");
     }
 
 // Start the ui.
@@ -71,8 +70,6 @@ fn launch_ui(repo_path: PathBuf) {
     let config = filedata::filedata::get_config();
     let default_ui = config.default_ui;
     let uiconfig: HashMap<String, String> = config.ui_config.get(&default_ui).expect("Get nested hashmap:").to_owned();
-    println!("{default_ui:?}");
-    println!("{uiconfig:?}");
     let repo_path_arg_name = uiconfig.get("repo_path_arg_name").expect("fail get repo path arg name:");
     let additional_args = uiconfig.get("additional_args")
         .expect("Additional_args have not been supplied in the config. Set to an empty string if there are no args to be supplied.")
@@ -89,9 +86,6 @@ fn launch_ui(repo_path: PathBuf) {
     args.push(repo_path_arg_name);
     args.push(&arg_string);
 
-    //arg_vec.append(&mut additional_args);
-    println!("args - {args:?}");
-    //println!("arg_vec - {arg_vec:?}");
     let _ = Command::new(default_ui)
             .args(args)
             .status()
@@ -115,8 +109,8 @@ fn run_ui(repo_path: PathBuf) {
 // * `git_args` - The args that have been supplied for git.
 fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
     let arg_string = format!("{}", repo_path.display());
-    println!("git args: {git_args:?}");
-    println!("repo_path: {repo_path:?}");
+    //println!("git args: {git_args:?}");
+    //println!("repo_path: {repo_path:?}");
     let _ = Command::new("git")
             .arg("-C")
             .arg(arg_string)
@@ -202,21 +196,14 @@ fn main() {
             run_ui(repo_path);
         },
         Some((ext, sub_matches)) => {
-            println!("none");
             let args = &mut sub_matches
                 .get_many::<OsString>("")
                 .into_iter()
                 .flatten()
                 .collect::<Vec<_>>();
-            println!("ext:{ext:?}");
-            println!("args:{args:?}");
             let ext = OsString::from(ext);
             let mut all_args = vec![&ext];
             all_args.append(args);
-
-            println!("ext:{ext:?}");
-            println!("all_args:{all_args:?}");
-
             git(repo_path, all_args);
            
         },

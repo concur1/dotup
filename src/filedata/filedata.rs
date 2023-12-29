@@ -53,7 +53,6 @@ pub fn write_config (config: Config) {
     let config_path = get_config_path();
     let prefix: &Path = config_path.parent().expect("cant");
     fs::create_dir_all(prefix).unwrap();
-    println!("create dir: {prefix:?}");
     let toml_output_data: String = toml::to_string(&config).expect("toml fail.");
     fs::write(get_config_path(), toml_output_data).expect("Unable to write file");
 }
