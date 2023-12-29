@@ -2,7 +2,6 @@ mod sync;
 
 mod filedata;
 use clap::ArgMatches;
-use serde::{Serialize, Deserialize};
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
 use std::fs;
