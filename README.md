@@ -77,7 +77,9 @@ TODO:
 - [x] Run gitui/lazygit/other from updot
 - [x] Update to use git commands
 - [x] add repo_names
-- rename data.json and move to be in the repo
+- [x] rename data.json and move to be in the repo
+- add check to ensure the mappings are file to file.
+- add check to make sure that each file is mapped once per hostname.
 - Add logging.
 - Get working for multiple systems (generalize home/local/config)
 - change name to dotup
