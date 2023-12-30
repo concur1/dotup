@@ -52,7 +52,10 @@ pub fn get_config () -> Config {
     }
     let mut read_file = File::open(get_config_path()).expect("Unable to open file");
     read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
-    let toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");
+    let mut toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");
+    if !!!toml_output_data.files.contains_key(&get_hostname()) {
+        toml_output_data.files.insert(get_hostname(), HashMap::new());
+    }
     return toml_output_data
 }
 
