@@ -2,13 +2,12 @@ mod sync;
 
 mod filedata;
 use clap::ArgMatches;
-use filedata::filedata::{get_config, get_config_path};
+use filedata::filedata::get_config;
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
 use std::fs;
 use std::process::Command;
 use clap;
-use dirs;
 use std::env;
 use clap::{arg, command};
 use std::thread;
