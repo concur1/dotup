@@ -6,6 +6,11 @@ Initialize a repository
 ```
 dotup init
 ```
+This will:
+- Initialize the dotup git repo.
+- Create dotup's configuration file `config.toml`.
+After running `dotup init` you can run `dotup status` to see that `config.toml` exists in the dotup repo but has not been committed or added to staging.
+
 Add a file to the list of tracked files:
 ```
 dotup track ~/.zshrc

@@ -2,7 +2,7 @@ mod sync;
 
 mod filedata;
 use clap::ArgMatches;
-use filedata::filedata::get_config;
+use filedata::filedata::{get_config, get_config_path};
 use std::{collections::HashMap, ffi::OsString};
 use std::path::PathBuf;
 use std::fs;
@@ -111,6 +111,7 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
     let arg_string = format!("{}", repo_path.display());
     //println!("git args: {git_args:?}");
     //println!("repo_path: {repo_path:?}");
+    println!("repo path to create {repo_path:?}");
     let _ = Command::new("git")
             .arg("-C")
             .arg(arg_string)
@@ -121,7 +122,12 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
 
 // Use clap to create the cli, returning the matches.
 fn get_cli(repo_path: PathBuf) -> ArgMatches {
-    sync::sync::sync_all(get_config(), &repo_path);
+    let mut git_data_path = repo_path.clone();
+    git_data_path.push(".git");
+    println!("config_path: {git_data_path:?}");
+    if git_data_path.exists() {
+        sync::sync::sync_all(get_config(), &repo_path);
+    }
     let matches = command!()
         //.version(crate_version!())
         .subcommand_required(true)
@@ -155,26 +161,11 @@ fn init_repo_dir(repo_path: PathBuf) {
         return
     }
     let _ = fs::create_dir_all(repo_path.clone());
-    //let arg_string = format!("{}", repo_path.display());
-    //let git_args = ["init"];
-    //println!("git args: {git_args:?}");
-    //println!("repo_path: {repo_path:?}");
-    //let _ = Command::new("git")
-    //        .arg("-C")
-    //        .arg(arg_string)
-    //        .args(git_args)
-    //        .status()
-    //        .expect("Failed to execute command");
     }
 
 
 fn main() {
-    let config = filedata::filedata::get_config();
-    let mut repo_path = dirs::data_dir().expect("No data directory found.");
-    repo_path.push("dotup/");
-    repo_path.push("dotup_test_repo/");
-    let profile = config.repo_name;
-    repo_path.push(profile);
+    let repo_path = filedata::filedata::get_repo_path();
     init_repo_dir(repo_path.clone());
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
@@ -182,7 +173,7 @@ fn main() {
         Some(("track", sub_matches)) => {
             let path = sub_matches.get_one::<String>("PATH").expect("fail");
             let path = PathBuf::from(path);
-            println!("running untrack {path:?}");
+            println!("running track {path:?}");
             track(path.to_owned());
         },
         Some(("untrack", sub_matches)) => {

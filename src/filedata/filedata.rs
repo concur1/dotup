@@ -26,16 +26,29 @@ pub struct Config {
 }
 
 pub fn get_config_path() -> PathBuf {
-    let mut path = dirs::config_dir().expect("Error, could not find config dir:");
-    path.push("dotup");
+    let mut path = get_repo_path();
+    //path.push("dotup");
     path.push("config.toml");
     path
 }
 
+pub fn get_repo_path() -> PathBuf {
+    let mut repo_path = dirs::data_dir().expect("No data directory found.");
+    repo_path.push("dotup/");
+    repo_path.push("dotup_test_repo/");
+    repo_path.push("default".to_string());
+    repo_path
+}
+
 pub fn get_config () -> Config {
     let mut read_data = String::new();
+    let mut git_data_path = get_repo_path();
+    git_data_path.push(".git");
     if !!!get_config_path().exists() {
-        create_default_config_file();
+        let _ = fs::create_dir_all(get_repo_path());
+        if git_data_path.exists() {
+            create_default_config_file();
+        }
     }
     let mut read_file = File::open(get_config_path()).expect("Unable to open file");
     read_file.read_to_string(&mut read_data).expect("Error converting file contents to string."); 
