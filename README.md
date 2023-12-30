@@ -1,13 +1,38 @@
 ## dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
-### Setup
+### Setup a new repository:
 Initialize a repository
 ```
 dotup init
 ```
+Add a file to the list of tracked files:
+```
+dotup track ~/.zshrc
+```
+Check that status of the local repo:
+```
+dotup status
+```
+Commit the change:
+```
+dotup commit -m "Initial file"
+```
+Change branch to main:
+```
+dotup branch -M main
+```
+Add the remote origin (This repo should be set up already using Codeberg/Gitlab/Github/Gitea or similar.)
+```
+dotup remote add origin git@github.com:concur1/dotfiles.git
+```
+Push to the origin:
+```
+dotup push -u origin main
+```
 **or**
-Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
+
+### Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 ```
 dotup clone <url> .
 ```
