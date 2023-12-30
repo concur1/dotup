@@ -55,8 +55,12 @@ pub fn get_config () -> Config {
     let mut toml_output_data: Config = toml::from_str(&read_data).expect("toml fail.");
     if !!!toml_output_data.files.contains_key(&get_hostname()) {
         toml_output_data.files.insert(get_hostname(), HashMap::new());
+        write_config(toml_output_data);
+        get_config()
     }
-    return toml_output_data
+    else {
+        toml_output_data
+    }
 }
 
 #[derive(Serialize, Deserialize)]

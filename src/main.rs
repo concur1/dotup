@@ -17,6 +17,7 @@ fn get_hostname() -> String {
     let hostname = gethostname::gethostname().into_string();
     let hostname = hostname.expect("hostname");
     hostname
+
 }
 
 // Add suplied path to the list of files to track
