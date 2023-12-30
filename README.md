@@ -38,9 +38,12 @@ dotup push -u origin main
 **or**
 
 ### Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
+Clone the remote repo into the local dotup repo with:
 ```
 dotup clone <url> .
 ```
+The `config.toml` file should already include a section for the file mappings under `[files.hostname1]`.
+But you should now also see that the config.toml file has been updated to include a section with the current `[files.hostname2]`:
 
 ### Tracking files
 Add a file to the list of tracked files
