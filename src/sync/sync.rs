@@ -37,6 +37,7 @@ pub fn sync_all(config: filedata::Config, repo_path: &Path) {
 }
 
 fn system_to_repo(path: &Path, repo_path: &Path) -> PathBuf {
+    let path = filedata::generalize_directory(path.to_owned());
     let dest = repo_path.to_path_buf();
     dest.join(path.strip_prefix("/").expect("Not a prefix."))
 }
@@ -48,7 +49,7 @@ fn repo_to_abs_repo(path: &Path, repo_path: &Path) -> PathBuf {
 
 fn abs_repo_to_system(path: &Path, repo_path: &Path) -> PathBuf {
     let dest = Path::new("/").join(path.strip_prefix(repo_path).expect("Not a prefix.")).to_path_buf();
-    dest
+    filedata::specify_directory(dest)
 }
 
 // Syncs the files specified in the configureation with the supplied repository path.
@@ -125,9 +126,12 @@ fn event_handler(event: Event, repo_path: &Path) {
 // * `source_file_path` - The filepath to copy from.
 // * `dest_file_path` - The filepath to copy to.
 fn copy_file(source_file_path: &Path, dest_file_path: &Path) -> std::io::Result<()> {
-    let prefix = dest_file_path.parent().unwrap();
+    let prefix = dest_file_path.parent().expect("error");
     fs::create_dir_all(prefix).unwrap();
-    fs::copy(source_file_path, dest_file_path)?;
+    //println!("source_file_path:{source_file_path:?}");
+    //println!("dest_file_path:{dest_file_path:?}");
+    fs::copy(source_file_path, dest_file_path).expect("Error copying!!!");
+    //let _ = fs::copy("/home/o/projects/new/dotup/README.md", "/home/o/.local/share/dotup/dotup_test_repo/default/home/user/projects/new/dotup/README.md");
     Ok(())
 }
 
@@ -174,7 +178,6 @@ pub fn sync_files(system_path: &Path, repo_path: &Path) -> std::io::Result<()> {
     let repo_seconds = repo_modified.duration_since(UNIX_EPOCH)
                   .expect("File A thinks it was created before Epoch")
                   .as_secs();
-    // println!("{repo_seconds:?}  {system_seconds:?}");
     if system_seconds>repo_seconds {
         copy_file_if_unequal(system_path, repo_path).expect("Error:");
         // println!("overwrite repo file");

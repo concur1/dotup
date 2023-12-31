@@ -1,6 +1,7 @@
 ## dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
+
 ### Setup a new repository:
 Initialize a repository
 ```
@@ -43,7 +44,8 @@ Clone the remote repo into the local dotup repo with:
 dotup clone <url> .
 ```
 The `config.toml` file should already include a section for the file mappings under `[files.hostname1]`.
-But you should now also see that the config.toml file has been updated to include a section with the current `[files.hostname2]`:
+But you should now also see that the config.toml file has been updated to include a section with the current `[files.hostname2]`.
+
 
 ### Tracking files
 Add a file to the list of tracked files

@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use dirs;
+use dirs::{self, data_local_dir};
 
 use crate::get_hostname;
 
@@ -38,6 +38,28 @@ pub fn get_repo_path() -> PathBuf {
     repo_path.push("dotup_test_repo/");
     repo_path.push("default".to_string());
     repo_path
+}
+
+pub fn generalize_directory(path: PathBuf) -> PathBuf {
+    let general_home_dir= "/home/user/";
+    let local_home_dir = dirs::home_dir().expect("home dir.");
+    if path.starts_with(local_home_dir.clone()) {
+        let path = path.strip_prefix(local_home_dir).expect("remove home prefix");
+        let path_buf = PathBuf::from(general_home_dir).join(path);
+        return path_buf
+    }
+    path
+}
+
+pub fn specify_directory(path: PathBuf) -> PathBuf {
+    let general_home_dir= "/home/user/";
+    let local_home_dir = dirs::home_dir().expect("home dir.");
+    if path.starts_with(general_home_dir) {
+        let path = path.strip_prefix(general_home_dir).expect("remove home prefix");
+        let path_buf = PathBuf::from(local_home_dir).join(path);
+        return path_buf
+    }
+    path
 }
 
 pub fn get_config () -> Config {

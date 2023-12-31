@@ -31,7 +31,7 @@ fn track(path: PathBuf) {
     if local_files.contains(&abs_local_path) {
         return
     }
-    let generic_path = abs_local_path.clone();
+    let generic_path = filedata::filedata::generalize_directory(abs_local_path.clone());
     let files_map = config.files.get_mut(&hostname).expect("get nixos.");
 
     files_map.insert(generic_path, abs_local_path);
@@ -99,6 +99,7 @@ fn run_ui(repo_path: PathBuf) {
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
+    let _ = fs::copy("/home/o/projects/new/dotup/README.md", "/home/o/.local/share/dotup/dotup_test_repo/default/home/user/projects/new/dotup/README.md");
         sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
         });
     launch_ui(repo_path);
