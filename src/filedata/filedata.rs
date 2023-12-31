@@ -97,15 +97,15 @@ fn create_default_config_file() {
     (get_hostname().to_owned(), nixos),
     ]);
     let gitui = HashMap::from([
-    ("program".to_owned(), "gitui".to_owned()),
+    ("name".to_owned(), "gitui".to_owned()),
     ("additional_args".to_owned(), "--watcher --logging".to_owned()),
     ]);
     let lazygit = HashMap::from([
-    ("program".to_owned(), "lazygit".to_owned()),
+    ("name".to_owned(), "lazygit".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
     let gitkraken = HashMap::from([
-    ("program".to_owned(), "gitkraken".to_owned()),
+    ("name".to_owned(), "gitkraken".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
     let ui_config_map = HashMap::from([
