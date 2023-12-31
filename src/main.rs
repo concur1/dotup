@@ -108,9 +108,7 @@ fn run_ui(repo_path: PathBuf) {
 // * `git_args` - The args that have been supplied for git.
 fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
     let arg_string = format!("{}", repo_path.display());
-    //println!("git args: {git_args:?}");
-    //println!("repo_path: {repo_path:?}");
-    println!("repo path to create {repo_path:?}");
+    //println!("repo path to create {repo_path:?}");
     let _ = Command::new("git")
             .arg("-C")
             .arg(arg_string)
@@ -123,7 +121,7 @@ fn git(repo_path: PathBuf, git_args: Vec<&OsString>) {
 fn get_cli(repo_path: PathBuf) -> ArgMatches {
     let mut git_data_path = repo_path.clone();
     git_data_path.push(".git");
-    println!("config_path: {git_data_path:?}");
+    //println!("config_path: {git_data_path:?}");
     if git_data_path.exists() {
         sync::sync::sync_all(get_config(), &repo_path);
     }
