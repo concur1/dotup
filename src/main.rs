@@ -65,16 +65,17 @@ fn untrack(path: PathBuf) {
 
 // Start the ui.
 // * `repo_path` - The path to the repo.
-fn launch_ui(repo_path: PathBuf) {
+fn launch_ui(repo_path: PathBuf, program: String) {
     let config = filedata::filedata::get_config();
-    let default_ui = config.default_ui;
-    let uiconfig: HashMap<String, String> = config.ui_config.get(&default_ui).expect("Get nested hashmap:").to_owned();
+    let error_message = format!("Error getting the details for program: {program}. Does a section in the config.toml exist for [program.{program}]?");
+    let uiconfig: HashMap<String, String> = config.program.get(&program).expect(&error_message).to_owned();
     let repo_path_arg_name = uiconfig.get("repo_path_arg_name").expect("fail get repo path arg name:");
     let additional_args = uiconfig.get("additional_args")
         .expect("Additional_args have not been supplied in the config. Set to an empty string if there are no args to be supplied.")
         .split(" ")
         .map(|s| s.to_owned())
         .collect::<Vec<_>>();
+    let program_name = uiconfig.get("name").expect("get program name:");
     let additional_args: Vec<&String> = additional_args.iter().collect();
     
     let arg_string = format!("{}", repo_path.display());
@@ -85,7 +86,7 @@ fn launch_ui(repo_path: PathBuf) {
     args.push(repo_path_arg_name);
     args.push(&arg_string);
 
-    let _ = Command::new(default_ui)
+    let _ = Command::new(&program_name)
             .args(args)
             .status()
             .expect("Failed to execute command");
@@ -93,14 +94,14 @@ fn launch_ui(repo_path: PathBuf) {
 
 // Start a new thread that will use the sync function to sync as well as starting the default ui.
 // * `repo_path` - The path to the repo.
-fn run_ui(repo_path: PathBuf) {
+fn run_ui(repo_path: PathBuf, program: String) {
     let tracking_data_path = fs::canonicalize(filedata::filedata::get_config_path()).expect("Error:");
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
         sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
         });
-    launch_ui(repo_path);
+    launch_ui(repo_path, program);
 }
 
 // Call git based on the repo path an supplied args for git
@@ -143,8 +144,10 @@ fn get_cli(repo_path: PathBuf) -> ArgMatches {
                 .arg_required_else_help(true),
         )
         .subcommand(
-            clap::Command::new("ui")
-                .about("Run the git ui that is set to 'default' in the config.toml file.")
+            clap::Command::new("run")
+                .about("Run the specified program (the program must be listed in the config). If no program is specified then the 'default' program will be run (if it exists in the config.toml file).")
+                .arg(arg!([PROGRAM] "The UI program specified in metadata that will be launched.").default_value("default"))
+                .arg_required_else_help(false),
         );
     cmd.get_matches()  
 }
@@ -179,9 +182,10 @@ fn main() {
             println!("running untrack {path:?}");
             untrack(path.to_owned());
         },
-        Some(("ui", _)) => {
+        Some(("run", sub_matches)) => {
+            let program = sub_matches.get_one::<String>("PROGRAM").expect("fail").clone();
             println!("running track");
-            run_ui(repo_path);
+            run_ui(repo_path, program);
         },
         Some((ext, sub_matches)) => {
             let args = &mut sub_matches

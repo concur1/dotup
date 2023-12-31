@@ -19,9 +19,8 @@ pub struct FileData {
    
 #[derive(Serialize, Deserialize)]
 pub struct Config {
-   pub default_ui: String,
    pub repo_name: String,
-   pub ui_config: HashMap<String, HashMap<String, String>>,
+   pub program: HashMap<String, HashMap<String, String>>,
    pub files: HashMap<String, HashMap<PathBuf, PathBuf>>,
 }
 
@@ -105,14 +104,17 @@ fn create_default_config_file() {
     (get_hostname().to_owned(), nixos),
     ]);
     let gitui = HashMap::from([
+    ("program".to_owned(), "gitui".to_owned()),
     ("repo_path_arg_name".to_owned(), "--directory".to_owned()),
     ("additional_args".to_owned(), "--watcher --logging".to_owned()),
     ]);
     let lazygit = HashMap::from([
+    ("program".to_owned(), "lazygit".to_owned()),
     ("repo_path_arg_name".to_owned(), "--path".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
     let gitkraken = HashMap::from([
+    ("program".to_owned(), "gitkraken".to_owned()),
     ("repo_path_arg_name".to_owned(), "--path".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
@@ -123,9 +125,8 @@ fn create_default_config_file() {
     ]);
 
     let data =  Config  {
-        default_ui: "gitui".to_owned(),
         repo_name: "default".to_owned(),
-        ui_config: ui_config_map,
+        program: ui_config_map,
         files: file_config,
         };
     write_config(data);
