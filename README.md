@@ -58,11 +58,21 @@ dotup untrack <important file>
 ```
 
 ### Use command line git or a git GUI/TUI application
-Run the git ui application that is specified in the config.toml
-If a TUI or GUI application such as GitUi, LazyGit, GitKraken is installed and specified in metadata it will be launched with the directory set to the dotfiles repo.
-```
-dotup ui
-```
+Using the `run` command we can run a (git ui) application whilst the dotup repo files are being sync's with the system files.
+1. You will need a section such as the following in the config.toml:
+    ```
+    [program.gitui] # This is the name of the section we will be configuring
+    name = "gitui" # This is the name of the program that will be running
+    additional_args = "--watcher --logging" # These are the arguments that will be supplied to the program
+    ```
+2. You will need to install the program you want to run.
+3. You would then run the command (with dotup syncing) with:
+    ```
+    dotup run gitui
+    ```
+
+By default gitui, lazygit, gitkraken and hx are already configured. 
+
 **or**
 Add files/changes to git with dotup followed by a git command
 ```

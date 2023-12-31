@@ -108,10 +108,15 @@ fn create_default_config_file() {
     ("name".to_owned(), "gitkraken".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
+    let hx = HashMap::from([
+    ("name".to_owned(), "hx".to_owned()),
+    ("additional_args".to_owned(), "".to_owned()),
+    ]);
     let ui_config_map = HashMap::from([
     ("gitui".to_owned(), gitui),
     ("lazygit".to_owned(), lazygit),
     ("gitkraken".to_owned(), gitkraken),
+    ("hx".to_owned(), hx),
     ]);
 
     let data =  Config  {
