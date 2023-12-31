@@ -98,17 +98,14 @@ fn create_default_config_file() {
     ]);
     let gitui = HashMap::from([
     ("program".to_owned(), "gitui".to_owned()),
-    ("repo_path_arg_name".to_owned(), "--directory".to_owned()),
     ("additional_args".to_owned(), "--watcher --logging".to_owned()),
     ]);
     let lazygit = HashMap::from([
     ("program".to_owned(), "lazygit".to_owned()),
-    ("repo_path_arg_name".to_owned(), "--path".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
     let gitkraken = HashMap::from([
     ("program".to_owned(), "gitkraken".to_owned()),
-    ("repo_path_arg_name".to_owned(), "--path".to_owned()),
     ("additional_args".to_owned(), "".to_owned()),
     ]);
     let ui_config_map = HashMap::from([

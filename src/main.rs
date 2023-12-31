@@ -69,7 +69,6 @@ fn launch_ui(repo_path: PathBuf, program: String) {
     let config = filedata::filedata::get_config();
     let error_message = format!("Error getting the details for program: {program}. Does a section in the config.toml exist for [program.{program}]?");
     let uiconfig: HashMap<String, String> = config.program.get(&program).expect(&error_message).to_owned();
-    let repo_path_arg_name = uiconfig.get("repo_path_arg_name").expect("fail get repo path arg name:");
     let additional_args = uiconfig.get("additional_args")
         .expect("Additional_args have not been supplied in the config. Set to an empty string if there are no args to be supplied.")
         .split(" ")
@@ -78,15 +77,13 @@ fn launch_ui(repo_path: PathBuf, program: String) {
     let program_name = uiconfig.get("name").expect("get program name:");
     let additional_args: Vec<&String> = additional_args.iter().collect();
     
-    let arg_string = format!("{}", repo_path.display());
     let mut args = additional_args;
     if args[0] == "" {
         args.remove(0);
     }
-    args.push(repo_path_arg_name);
-    args.push(&arg_string);
 
     let _ = Command::new(&program_name)
+            .current_dir(repo_path)
             .args(args)
             .status()
             .expect("Failed to execute command");
