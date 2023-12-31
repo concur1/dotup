@@ -1,16 +1,11 @@
 use std::fs;
 use std::time::UNIX_EPOCH;
-use serde::{Serialize, Deserialize};
+use clap::Error;
 use notify;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher, Event};
 use std::path::{Path, PathBuf};
 use crate::filedata::filedata;
 use crate::get_hostname;
-
-#[derive(Debug, Serialize, Deserialize)]
-struct T {
-    system_file_path: String,
-}
 
 // Returns the 'dest_path'. If the system path is supplied as 'path' then a repository path
 // will be returned in the dest_path. If a repo path is supplied then a system path will eb returned.
@@ -57,7 +52,7 @@ fn abs_repo_to_system(path: &Path, repo_path: &Path) -> PathBuf {
 // # Arguments
 //
 // * 'repo_path' The path of the repo to sync with.
-pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), serde_json::Error> {
+pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), Error> {
     let abs_repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let data = filedata::get_config(); 
     let files_to_track = data.files.get(&get_hostname()).expect("get nixos files error:");

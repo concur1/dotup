@@ -9,13 +9,6 @@ use dirs::{self, data_local_dir};
 
 use crate::get_hostname;
 
-#[derive(Serialize, Deserialize)]
-pub struct FileData {
-    /// The path to the file to read
-    pub paths: HashMap<PathBuf, PathBuf>
-}
-
-
    
 #[derive(Serialize, Deserialize)]
 pub struct Config {
