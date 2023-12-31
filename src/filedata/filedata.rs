@@ -5,8 +5,6 @@ use std::fs::File;
 use std::io::Read;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use dirs::{self, data_local_dir};
-
 use crate::get_hostname;
 
    
