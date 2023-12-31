@@ -66,7 +66,6 @@ fn untrack(path: PathBuf) {
 // Start the ui.
 // * `repo_path` - The path to the repo.
 fn launch_ui(repo_path: PathBuf) {
-    filedata::filedata::get_config();
     let config = filedata::filedata::get_config();
     let default_ui = config.default_ui;
     let uiconfig: HashMap<String, String> = config.ui_config.get(&default_ui).expect("Get nested hashmap:").to_owned();
@@ -99,7 +98,6 @@ fn run_ui(repo_path: PathBuf) {
     let repo_path = fs::canonicalize(&repo_path).expect("Error getting absolute path.");
     let repo_path_clone = repo_path.clone();
     thread::spawn(move || {
-    let _ = fs::copy("/home/o/projects/new/dotup/README.md", "/home/o/.local/share/dotup/dotup_test_repo/default/home/user/projects/new/dotup/README.md");
         sync::sync::sync(&repo_path_clone, &tracking_data_path ).expect("Syncing failed.");
         });
     launch_ui(repo_path);
@@ -129,7 +127,7 @@ fn get_cli(repo_path: PathBuf) -> ArgMatches {
     if git_data_path.exists() {
         sync::sync::sync_all(get_config(), &repo_path);
     }
-    let matches = command!()
+    let cmd = command!()
         //.version(crate_version!())
         .subcommand_required(true)
         .arg_required_else_help(true)
@@ -149,8 +147,8 @@ fn get_cli(repo_path: PathBuf) -> ArgMatches {
         .subcommand(
             clap::Command::new("ui")
                 .about("Run the git ui that is set to 'default' in the config.toml file.")
-        ).get_matches();
-    matches   
+        );
+    cmd.get_matches()  
 }
 
 // Initialise the repo if it has not already been initialized.
