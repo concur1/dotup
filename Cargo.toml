@@ -1,6 +1,6 @@
 [package]
 name = "dotup"
-version = "0.1.14"
+version = "0.1.15"
 edition = "2021"
 description = "A dotfile manager written in rust."
 repository = "https://github.com/concur1/dotup"
