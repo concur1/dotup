@@ -25,7 +25,6 @@ pub fn get_config_path() -> PathBuf {
 pub fn get_repo_path() -> PathBuf {
     let mut repo_path = dirs::data_dir().expect("No data directory found.");
     repo_path.push("dotup/");
-    repo_path.push("dotup_test_repo/");
     repo_path.push("default".to_string());
     repo_path
 }
