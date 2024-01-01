@@ -81,6 +81,9 @@ dotup add <important file>
 dotup commit
 ```
 
+### Example usage:
+![](dotup2.GIF)
+
 TODO:
 - Get tracking working on local system.
     - [x] Use repo path in notify watcher
