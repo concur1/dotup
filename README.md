@@ -1,4 +1,4 @@
-## dotup
+# dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
 
@@ -16,7 +16,7 @@ Add a file to the list of tracked files:
 ```
 dotup track ~/.zshrc
 ```
-Check that status of the local repo:
+Check the status of the local repo:
 ```
 dotup status
 ```
@@ -36,7 +36,6 @@ Push to the origin:
 ```
 dotup push -u origin main
 ```
-**or**
 
 ### Clone an existing repository (MAKE SURE TO INCLUDE THE `.`)
 Clone the remote repo into the local dotup repo with:
@@ -126,3 +125,4 @@ some cases to consider:
 
     - soln7 - Do not use a shared tracked files file. Instead each file will be specified locally or with a config file.
         - if using cli to specify files to track
+
