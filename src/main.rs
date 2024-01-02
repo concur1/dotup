@@ -181,7 +181,6 @@ fn main() {
         },
         Some(("run", sub_matches)) => {
             let program = sub_matches.get_one::<String>("PROGRAM").expect("fail").clone();
-            println!("running track");
             run_ui(repo_path, program);
         },
         Some((ext, sub_matches)) => {
