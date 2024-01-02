@@ -82,7 +82,7 @@ dotup commit
 ```
 
 ### Example usage:
-![](demo.webm)
+[demo.webm](https://github.com/concur1/dotup/assets/87602390/6012283e-7ab5-4176-aa6c-09f6db37bc8a)
 
 TODO:
 - Get tracking working on local system.
@@ -91,6 +91,7 @@ TODO:
     - [x] Get syncing working on local system.
     - [x] Get syncing to pick up newly added files
 - [x] Get notify/sync command working.
+
 - [x] create config
 - [x] Run gitui/lazygit/other from updot
 - [x] Update to use git commands
