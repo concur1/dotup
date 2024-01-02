@@ -56,7 +56,7 @@ Remove a file from the list of tracked files
 dotup untrack <important file>
 ```
 
-### Use command line git or a git GUI/TUI application
+### Use a git GUI/TUI application
 Using the `run` command we can run a (git ui) application whilst the dotup repo files are being sync's with the system files.
 To do this:
 1. Create a section for the program you to be launched in the config.toml:
@@ -73,7 +73,7 @@ To do this:
 
 By default gitui, lazygit, gitkraken and hx are already configured. 
 
-**or**
+### Use command line git
 Add files/changes to git with dotup followed by a git command
 ```
 dotup status 
@@ -82,7 +82,7 @@ dotup commit
 ```
 
 ### Example usage:
-![](dotup2.GIF)
+![](demo.webm)
 
 TODO:
 - Get tracking working on local system.
