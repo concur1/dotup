@@ -66,7 +66,7 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), Error> {
 
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
-    watcher.watch(tracking_data_path, RecursiveMode::Recursive).expect("Error:");
+    //watcher.watch(tracking_data_path, RecursiveMode::Recursive).expect("Error:");
     for (local_path, system_path) in files_to_track.clone().into_iter() {
         let file_repo_abs_path = repo_to_abs_repo(&local_path, &repo_path);
         watcher.watch(Path::new(&system_path),RecursiveMode::Recursive).expect("Error:");
@@ -89,8 +89,6 @@ pub fn sync(repo_path: &Path, tracking_data_path: &Path) -> Result<(), Error> {
         //    Err(error) => log::error!("Error: {error:?}"),
         //}
     }
-    let _ = sync(repo_path, tracking_data_path);
-
     Ok(())
 }
 
