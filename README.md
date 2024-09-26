@@ -1,3 +1,7 @@
+> [!WARNING]  
+> This CLI tool was made for learning purposes. It is not fully functioinal/stable and probably never will be.
+
+
 # dotup
 A command line tool for backing up dotfiles. Inspired by [yadm](https://github.com/TheLocehiliosan/yadm).
 
